@@ -1020,7 +1020,29 @@ if (exportBtn) {
         }
 
         try {
-            // Salva o modelo (JSON + Pesos)
+            // 1. Salva Metadata (Nomes das classes)
+            const sortedKeys = Object.keys(classesData).sort((a, b) => a - b);
+            const metadata = {
+                modelName: "PiCode Vision Model",
+                version: "1.0",
+                date: new Date().toISOString(),
+                labels: sortedKeys.map(id => {
+                    const cardInput = document.querySelector(`#card-${id} .class-name-input`);
+                    return cardInput ? cardInput.value : `Classe ${parseInt(id) + 1}`;
+                })
+            };
+
+            const blob = new Blob([JSON.stringify(metadata, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "metadata.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url); // Limpa memória
+
+            // 2. Salva o modelo (JSON + Pesos)
             // O browser fará o download de dois arquivos:
             // 1. my-model.json (topologia)
             // 2. my-model.weights.bin (pesos)
